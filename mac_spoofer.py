@@ -1,5 +1,6 @@
 import subprocess
-import optparse 
+import optparse
+import re 
 
 # Function to capture and parse user input 
 def user_arguments():
@@ -29,11 +30,30 @@ def change_mac(interface, new_mac):
     # Turn interface on 
     subprocess.call(['ifconfig', interface, 'up'])
 
-    print('[+] Done! Your new MAC is:', new_mac)
+    #print('[+] Done! Your new MAC is:', new_mac)
 
+
+# Find current MAC address
+def find_mac_address(interface):
+    ifconfig_result = subprocess.check_output(['ifconfig', interface])
+
+    # Subprocess returns ifconfig_result in bytes format. It can be turned into str format with:
+    ifconfig_result = ifconfig_result.decode('utf-8')
+
+    # Search for MAC address with regex
+    mac_address_regex = re.search(r"\w\w:\w\w:\w\w:\w\w:\w\w:\w\w", ifconfig_result)
+    if mac_address_regex:
+        return mac_address_regex.group(0)
+    else:
+        print('\n[-] Sorry! Couldn\'t find a MAC address')
 
 # Capture and parse user input
 options = user_arguments()
 
-# Execute MAC change with captured user input
-change_mac(options.interface, options.new_mac)
+current_mac = find_mac_address(options.interface)
+print("\n[+] Your current MAC address is", str(current_mac))
+
+if not change_mac(options.interface, options.new_mac):
+    print("[-] Something went wrong! MAC address couldn't be changed. Try again!")
+else:
+    print("[+] Your new mAC address is", options.new_mac)
