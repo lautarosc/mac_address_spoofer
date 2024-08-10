@@ -32,7 +32,6 @@ def change_mac(interface, new_mac):
 
     #print('[+] Done! Your new MAC is:', new_mac)
 
-
 # Find current MAC address
 def find_mac_address(interface):
     ifconfig_result = subprocess.check_output(['ifconfig', interface])
@@ -50,10 +49,19 @@ def find_mac_address(interface):
 # Capture and parse user input
 options = user_arguments()
 
+# Show user's MAC address before change
 current_mac = find_mac_address(options.interface)
 print("\n[+] Your current MAC address is", str(current_mac))
 
-if not change_mac(options.interface, options.new_mac):
-    print("[-] Something went wrong! MAC address couldn't be changed. Try again!")
-else:
-    print("[+] Your new mAC address is", options.new_mac)
+# Attempt to change MAC address
+change_mac(options.interface, options.new_mac)
+
+# Check if MAC changed, and inform the user the results either way
+def check_mac_change(interface, new_mac):
+    current_mac = find_mac_address(options.interface)
+    if current_mac == options.new_mac:
+        print("\n[+] Done! Your new MAC is:", options.new_mac)
+    else:
+        print("\n[-] Something went wrong! MAC adress could not be changed. Try again!")
+
+check_mac_change(options.interface, options.new_mac)
